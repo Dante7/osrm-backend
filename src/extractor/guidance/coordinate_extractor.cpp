@@ -161,18 +161,23 @@ util::Coordinate CoordinateExtractor::ExtractRepresentativeCoordinate(
             util::coordinate_calculation::haversineDistance(turn_coordinate, coordinates[1]) <
                 ASSUMED_LANE_WIDTH)
         {
-            const auto result =
-                GetCorrectedCoordinate(turn_coordinate, coordinates[1], coordinates.back());
-            BOOST_ASSERT(not_same_as_start(result));
-            return result;
+            const auto initial_distance =
+                util::coordinate_calculation::haversineDistance(turn_coordinate, coordinates[1]);
+            const auto total_distance =
+                util::coordinate_calculation::haversineDistance(turn_coordinate, coordinates.back());
+
+            if (initial_distance > ASSUMED_LANE_WIDTH && total_distance > initial_distance)
+            {
+                const auto result =
+                    GetCorrectedCoordinate(turn_coordinate, coordinates[1], coordinates.back());
+                BOOST_ASSERT(not_same_as_start(result));
+                return result;
+            }
         }
-        else
-        {
-            // TODO: possibly re-enable with
-            // https://github.com/Project-OSRM/osrm-backend/issues/3470
-            // BOOST_ASSERT(not_same_as_start(coordinates.back()));
-            return coordinates.back();
-        }
+        // TODO: possibly re-enable with
+        // https://github.com/Project-OSRM/osrm-backend/issues/3470
+        // BOOST_ASSERT(not_same_as_start(coordinates.back()));
+        return coordinates.back();
     }
 
     const auto first_distance =
@@ -988,7 +993,9 @@ CoordinateExtractor::GetCorrectedCoordinate(const util::Coordinate fixpoint,
     // we can use the end-coordinate
     if (util::coordinate_calculation::haversineDistance(vector_base, vector_head) <
         DESIRED_COORDINATE_DIFFERENCE)
+    {
         return vector_head;
+    }
     else
     {
         /* to correct for the initial offset, we move the lookahead coordinate close
