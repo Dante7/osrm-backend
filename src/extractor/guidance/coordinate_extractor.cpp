@@ -163,8 +163,8 @@ util::Coordinate CoordinateExtractor::ExtractRepresentativeCoordinate(
         {
             const auto initial_distance =
                 util::coordinate_calculation::haversineDistance(turn_coordinate, coordinates[1]);
-            const auto total_distance =
-                util::coordinate_calculation::haversineDistance(turn_coordinate, coordinates.back());
+            const auto total_distance = util::coordinate_calculation::haversineDistance(
+                turn_coordinate, coordinates.back());
 
             if (initial_distance > ASSUMED_LANE_WIDTH && total_distance > initial_distance)
             {
